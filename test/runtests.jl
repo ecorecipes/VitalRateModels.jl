@@ -17,7 +17,7 @@ using StatsModels
 
     # Generate test data
     n = 200
-    size_t = randn(n) .* 2 .+ 5
+    size_t = clamp.(randn(n) .* 2 .+ 5, 0.1, Inf)
     survived = [rand() < 1 / (1 + exp(-(s - 5))) for s in size_t]
     size_t1 = size_t .+ randn(n) .* 0.5 .+ 0.3
     fecundity = [max(0, round(Int, exp(0.5 * s - 2) + randn())) for s in size_t]
@@ -93,8 +93,8 @@ using StatsModels
         long = verticalize(wide; id_col=:id,
                            size_cols=[:size_y1, :size_y2, :size_y3])
         @test nrow(long) == 10  # 5 individuals × 2 transitions
-        @test :size_t in names(long)
-        @test :size_t1 in names(long)
+        @test :size_t in propertynames(long)
+        @test :size_t1 in propertynames(long)
 
         # Test validation
         @test validate_demographic_data(data) == true

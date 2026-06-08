@@ -152,8 +152,9 @@ function validate_demographic_data(data::DataFrame;
                                    survival_col::Symbol=:survived,
                                    fecundity_col::Symbol=:fecundity)
     issues = String[]
+    cols = Set(propertynames(data))
 
-    if size_col in names(data)
+    if size_col in cols
         s = data[!, size_col]
         any(ismissing, s) && push!(issues, "$(count(ismissing, s)) missing values in $size_col")
         non_missing = collect(skipmissing(s))
@@ -162,7 +163,7 @@ function validate_demographic_data(data::DataFrame;
         push!(issues, "Column $size_col not found")
     end
 
-    if survival_col in names(data)
+    if survival_col in cols
         surv = data[!, survival_col]
         unique_vals = unique(collect(skipmissing(surv)))
         if !all(v -> v in (0, 1, true, false), unique_vals)
@@ -170,7 +171,7 @@ function validate_demographic_data(data::DataFrame;
         end
     end
 
-    if fecundity_col in names(data)
+    if fecundity_col in cols
         fec = data[!, fecundity_col]
         non_missing = collect(skipmissing(fec))
         any(x -> x < 0, non_missing) && push!(issues, "Negative fecundity values")
@@ -197,25 +198,26 @@ function summarize_transitions(data::DataFrame;
                                size_col::Symbol=:size_t,
                                size_t1_col::Symbol=:size_t1)
     n = nrow(data)
+    cols = Set(propertynames(data))
     println("Demographic transition summary:")
     println("  N transitions: $n")
 
-    if size_col in names(data)
+    if size_col in cols
         s = collect(skipmissing(data[!, size_col]))
         println("  Size at t:   min=$(minimum(s)), max=$(maximum(s)), mean=$(round(mean(s), digits=2))")
     end
 
-    if size_t1_col in names(data)
+    if size_t1_col in cols
         s1 = collect(skipmissing(data[!, size_t1_col]))
         println("  Size at t+1: min=$(minimum(s1)), max=$(maximum(s1)), mean=$(round(mean(s1), digits=2))")
     end
 
-    if :survived in names(data)
+    if :survived in cols
         surv = collect(skipmissing(data[!, :survived]))
         println("  Survival:    $(round(mean(surv), digits=3)) ($(sum(surv))/$(length(surv)))")
     end
 
-    if :fecundity in names(data)
+    if :fecundity in cols
         fec = collect(skipmissing(data[!, :fecundity]))
         println("  Fecundity:   mean=$(round(mean(fec), digits=2)), max=$(maximum(fec))")
     end
