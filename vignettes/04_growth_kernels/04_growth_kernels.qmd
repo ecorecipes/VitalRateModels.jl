@@ -1,0 +1,194 @@
+---
+title: "From fitted vital rates to IPM kernels"
+author: "Simon Frost"
+format:
+  commonmark:
+    variant: -raw_html
+    wrap: none
+engine: julia
+---
+
+## Overview
+
+Once survival, growth, fecundity, and recruitment models have been fitted, the next step is to assemble them into an IPM kernel. `VitalRateModels.jl` provides `vital_rates_to_kernel()` for exactly this bridge between statistics and projection models.
+
+In this vignette we:
+
+- fit demographic models from simulated data,
+- construct a survival-growth $P$ kernel and a fecundity $F$ kernel,
+- connect the construction to `StructuredPopulationCore.ContinuousDomain`,
+- compute $\lambda$ from the resulting kernel matrix, and
+- compare the fitted kernel with the analytically specified truth.
+
+## Setup
+
+```{julia}
+using VitalRateModels
+using DataFrames
+using StatsModels
+using Plots
+using Distributions
+using Random
+using Statistics
+using StructuredPopulationCore: ContinuousDomain, meshpoints, step_size, lambda
+
+Random.seed!(2029)
+```
+
+## Simulating kernel-generating data
+
+The simulated plant has size-dependent survival, approximately linear growth, Poisson fecundity, and a recruit size distribution that is weakly related to parent size.
+
+```{julia}
+n = 600
+size_t = clamp.(rand(Normal(5.0, 1.4), n), 0.7, 10.0)
+
+surv_prob = @. 1 / (1 + exp(-(-2.1 + 0.55 * size_t)))
+survived = rand.(Bernoulli.(surv_prob)) .== 1
+
+size_t1 = similar(size_t)
+for i in eachindex(size_t)
+    mu = 1.1 + 0.88 * size_t[i]
+    size_t1[i] = survived[i] ? rand(Normal(mu, 0.8)) : 0.0
+end
+size_t1 = clamp.(size_t1, 0.0, 12.0)
+
+fec_mean = @. exp(-3.3 + 0.35 * size_t)
+fecundity = [survived[i] ? rand(Poisson(fec_mean[i])) : 0 for i in eachindex(size_t)]
+
+n_recruits = 250
+parent_size = clamp.(rand(Normal(6.0, 1.1), n_recruits), 1.0, 10.0)
+recruit_size = clamp.(rand.(Normal.(1.2 .+ 0.03 .* parent_size, 0.35)), 0.2, 3.0)
+
+demo_data = DataFrame(size_t=size_t, size_t1=size_t1, survived=survived, fecundity=fecundity)
+recruit_data = DataFrame(size_t=parent_size, recruit_size=recruit_size)
+```
+
+## Fitting vital rates
+
+```{julia}
+survival_fit = fit_vital_rate(SurvivalModel, demo_data, @formula(survived ~ size_t))
+growth_fit = fit_vital_rate(GrowthModel, filter(:survived => identity, demo_data), @formula(size_t1 ~ size_t))
+fecundity_fit = fit_vital_rate(FecundityModel, demo_data, @formula(fecundity ~ size_t), distribution=Poisson_())
+recruitment_fit = fit_vital_rate(RecruitmentModel, recruit_data, @formula(recruit_size ~ size_t))
+```
+
+## Constructing a continuous domain
+
+A `ContinuousDomain` defines the size range and the discretization used to materialize the kernel.
+
+```{julia}
+domain = ContinuousDomain(0.5, 10.5, 80)
+z = meshpoints(domain)
+h = step_size(domain)
+```
+
+## Building the P and F kernels
+
+The $P$ kernel combines survival and growth. The $F$ kernel combines fecundity and recruit size.
+
+```{julia}
+P_fit = vital_rates_to_kernel(survival_fit, growth_fit, domain)
+F_fit = vital_rates_to_kernel(fecundity_fit, recruitment_fit, domain)
+K_fit = P_fit + F_fit
+
+println("Kernel dimension = ", size(K_fit))
+println("λ from fitted kernel = ", round(lambda(K_fit), digits=4))
+```
+
+## Analytically specified comparison kernel
+
+Because the data were simulated from known demographic relationships, we can build a reference kernel directly and compare it with the fitted one.
+
+```{julia}
+true_survival(z) = 1 / (1 + exp(-(-2.1 + 0.55 * z)))
+true_growth(zp, z) = pdf(Normal(1.1 + 0.88 * z, 0.8), zp)
+true_fecundity(z) = exp(-3.3 + 0.35 * z)
+
+recruit_center = mean(1.2 .+ 0.03 .* parent_size)
+recruit_pdf = pdf.(Normal(recruit_center, 1.0), z)
+recruit_pdf ./= sum(recruit_pdf) * h
+
+P_true = zeros(length(z), length(z))
+F_true = zeros(length(z), length(z))
+for j in eachindex(z)
+    for i in eachindex(z)
+        P_true[i, j] = true_survival(z[j]) * true_growth(z[i], z[j]) * h
+        F_true[i, j] = true_fecundity(z[j]) * recruit_pdf[i] * h
+    end
+end
+K_true = P_true + F_true
+
+println("λ from analytic kernel = ", round(lambda(K_true), digits=4))
+println("Max |K_fit - K_true|   = ", round(maximum(abs.(K_fit .- K_true)), digits=4))
+```
+
+## Visualizing the kernels
+
+```{julia}
+p1 = heatmap(
+    z,
+    z,
+    P_fit,
+    xlabel="Size at time t",
+    ylabel="Size at time t+1",
+    title="P kernel from fitted survival + growth",
+    color=:viridis,
+)
+
+p2 = heatmap(
+    z,
+    z,
+    F_fit,
+    xlabel="Size at time t",
+    ylabel="Recruit size",
+    title="F kernel from fitted fecundity + recruitment",
+    color=:magma,
+)
+
+p3 = heatmap(
+    z,
+    z,
+    K_fit,
+    xlabel="Size at time t",
+    ylabel="Size at time t+1",
+    title="Total kernel K = P + F",
+    color=:plasma,
+)
+
+plot(p1, p2, p3, layout=(1, 3), size=(1200, 340))
+```
+
+## Fitted versus analytic kernel
+
+```{julia}
+heatmap(
+    z,
+    z,
+    K_fit .- K_true,
+    xlabel="Size at time t",
+    ylabel="Size at time t+1",
+    title="Difference between fitted and analytic kernels",
+    color=:balance,
+)
+```
+
+The fitted kernel should recover the broad demographic structure of the analytic kernel: low persistence at small sizes, a strong growth ridge across the main diagonal, and a fecundity contribution concentrated among larger parents.
+
+## Summary
+
+In this vignette we:
+
+1. fit four demographic submodels,
+2. used `ContinuousDomain` to define an IPM mesh,
+3. built $P$ and $F$ kernels with `vital_rates_to_kernel()`,
+4. computed $\lambda$ from the discretized kernel matrix, and
+5. compared the fitted result with the analytic truth.
+
+This is the key bridge from statistical vital-rate estimation to full projection modelling.
+
+## References
+
+- Ellner, S. P., Childs, D. Z., & Rees, M. (2016). *Data-Driven Modelling of Structured Populations*. Springer.
+- Easterling, M. R., Ellner, S. P., & Dixon, P. M. (2000). Size-specific sensitivity: applying a new structured population model. *Ecology*, 81, 694-708.
+- Rees, M., Childs, D. Z., & Ellner, S. P. (2014). Building integral projection models: a user's guide. *Journal of Animal Ecology*, 83, 528-545.
