@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>LTRE from Data · VitalRateModels.jl</title><meta name="title" content="LTRE from Data · VitalRateModels.jl"/><meta property="og:title" content="LTRE from Data · VitalRateModels.jl"/><meta property="twitter:title" content="LTRE from Data · VitalRateModels.jl"/><meta name="description" content="Documentation for VitalRateModels.jl."/><meta property="og:description" content="Documentation for VitalRateModels.jl."/><meta property="twitter:description" content="Documentation for VitalRateModels.jl."/><meta property="og:url" content="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/07_ltre_from_data/"/><meta property="twitter:url" content="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/07_ltre_from_data/"/><link rel="canonical" href="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/07_ltre_from_data/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">VitalRateModels.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../01_introduction/">Introduction</a></li><li><a class="tocitem" href="../02_model_selection/">Model Selection</a></li><li><a class="tocitem" href="../03_fecundity/">Fecundity Models</a></li><li><a class="tocitem" href="../04_growth_kernels/">Growth Kernels</a></li><li><a class="tocitem" href="../05_data_preparation/">Data Preparation</a></li><li><a class="tocitem" href="../06_density_dependence/">Density Dependence</a></li><li class="is-active"><a class="tocitem" href>LTRE from Data</a><ul class="internal"><li><a class="tocitem" href="#Overview"><span>Overview</span></a></li><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Simulating-two-environments"><span>Simulating two environments</span></a></li><li><a class="tocitem" href="#Fitting-vital-rates-for-each-population"><span>Fitting vital rates for each population</span></a></li><li><a class="tocitem" href="#Building-kernels"><span>Building kernels</span></a></li><li><a class="tocitem" href="#Classical-LTRE"><span>Classical LTRE</span></a></li><li><a class="tocitem" href="#Exact-LTRE"><span>Exact LTRE</span></a></li><li><a class="tocitem" href="#Comparing-classical-and-exact-decompositions"><span>Comparing classical and exact decompositions</span></a></li><li><a class="tocitem" href="#Summary"><span>Summary</span></a></li><li><a class="tocitem" href="#References"><span>References</span></a></li></ul></li></ul></li><li><span class="tocitem">API Reference</span><ul><li><a class="tocitem" href="../../api/types/">Types</a></li><li><a class="tocitem" href="../../api/fitting/">Fitting</a></li><li><a class="tocitem" href="../../api/model_selection/">Model Selection</a></li><li><a class="tocitem" href="../../api/kernels/">Kernel Construction</a></li><li><a class="tocitem" href="../../api/data_prep/">Data Preparation</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>LTRE from Data</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>LTRE from Data</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ecorecipes/VitalRateModels.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ecorecipes/VitalRateModels.jl/blob/main/docs/src/tutorials/07_ltre_from_data.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="Overview"><a class="docs-heading-anchor" href="#Overview">Overview</a><a id="Overview-1"></a><a class="docs-heading-anchor-permalink" href="#Overview" title="Permalink"></a></h2><p>A life table response experiment (LTRE) decomposes differences in population growth between environments, treatments, or populations into contributions from underlying demographic processes. Here we fit vital rates for a &quot;good year&quot; and a &quot;bad year&quot;, construct kernels from those fitted rates, and then compare classical and exact LTRE decompositions.</p><p>To keep the exact fANOVA decomposition tractable, we use a deliberately coarse discretization of the size domain.</p><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><pre><code class="language-julia hljs">using VitalRateModels, DataFrames, StatsModels, Distributions, Plots
+using Random
+using StructuredPopulationCore: ContinuousDomain, meshpoints, lambda, ltre, exact_ltre
+
+Random.seed!(2032)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Random.TaskLocalRNG()</code></pre><h2 id="Simulating-two-environments"><a class="docs-heading-anchor" href="#Simulating-two-environments">Simulating two environments</a><a id="Simulating-two-environments-1"></a><a class="docs-heading-anchor-permalink" href="#Simulating-two-environments" title="Permalink"></a></h2><p>The good year has higher survival, more growth, and higher fecundity than the bad year.</p><pre><code class="language-julia hljs">function simulate_year(n; surv_int, surv_slope, grow_int, grow_slope, grow_sd, fec_int, fec_slope, recruit_mean)
+    size_t = clamp.(rand(Normal(5.0, 1.3), n), 0.8, 9.5)
+    surv_prob = @. 1 / (1 + exp(-(surv_int + surv_slope * size_t)))
+    survived = rand.(Bernoulli.(surv_prob)) .== 1
+
+    size_t1 = similar(size_t)
+    for i in eachindex(size_t)
+        μ = grow_int + grow_slope * size_t[i]
+        size_t1[i] = survived[i] ? rand(Normal(μ, grow_sd)) : 0.0
+    end
+    size_t1 = clamp.(size_t1, 0.0, 11.0)
+
+    fec_mean = @. exp(fec_int + fec_slope * size_t)
+    fecundity = [survived[i] ? rand(Poisson(fec_mean[i])) : 0 for i in eachindex(size_t)]
+
+    repro_idx = findall(&gt;(0), fecundity)
+    parent_size = size_t[repro_idx]
+    recruit_size = clamp.(rand.(Normal.(fill(recruit_mean, length(parent_size)), 0.35)), 0.2, 3.0)
+
+    demography = DataFrame(size_t=size_t, size_t1=size_t1, survived=survived, fecundity=fecundity)
+    recruits = DataFrame(size_t=parent_size, recruit_size=recruit_size)
+    return demography, recruits
+end
+
+good_demo, good_recruits = simulate_year(
+    500;
+    surv_int=-1.5,
+    surv_slope=0.52,
+    grow_int=1.2,
+    grow_slope=0.90,
+    grow_sd=0.7,
+    fec_int=-3.1,
+    fec_slope=0.36,
+    recruit_mean=1.3,
+)
+
+bad_demo, bad_recruits = simulate_year(
+    500;
+    surv_int=-2.6,
+    surv_slope=0.42,
+    grow_int=0.7,
+    grow_slope=0.82,
+    grow_sd=0.9,
+    fec_int=-4.0,
+    fec_slope=0.28,
+    recruit_mean=1.0,
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(500×4 DataFrame
+ Row │ size_t   size_t1  survived  fecundity 
+     │ Float64  Float64  Bool      Int64     
+─────┼───────────────────────────────────────
+   1 │ 5.6036   4.81241      true          1
+   2 │ 2.40282  0.0         false          0
+   3 │ 5.63562  0.0         false          0
+   4 │ 2.61297  3.65357      true          0
+   5 │ 3.15462  0.0         false          0
+   6 │ 3.97653  4.54039      true          0
+   7 │ 1.79145  0.0         false          0
+   8 │ 4.66944  2.69135      true          0
+  ⋮  │    ⋮        ⋮        ⋮          ⋮
+ 494 │ 5.76532  5.41706      true          0
+ 495 │ 4.10882  4.05675      true          0
+ 496 │ 5.43653  0.0         false          0
+ 497 │ 4.02793  0.0         false          0
+ 498 │ 7.43669  6.58429      true          0
+ 499 │ 3.59751  3.39284      true          0
+ 500 │ 4.91601  0.0         false          0
+                             485 rows omitted, 12×2 DataFrame
+ Row │ size_t   recruit_size 
+     │ Float64  Float64      
+─────┼───────────────────────
+   1 │ 5.6036       0.565309
+   2 │ 2.60447      1.34511
+   3 │ 7.31545      0.795551
+   4 │ 6.96735      1.06936
+   5 │ 6.46682      1.13333
+   6 │ 7.67916      0.851462
+   7 │ 6.60041      1.1125
+   8 │ 2.47123      1.57148
+   9 │ 8.85346      0.921885
+  10 │ 7.46008      1.40184
+  11 │ 7.063        1.22445
+  12 │ 4.15512      0.985435)</code></pre><h2 id="Fitting-vital-rates-for-each-population"><a class="docs-heading-anchor" href="#Fitting-vital-rates-for-each-population">Fitting vital rates for each population</a><a id="Fitting-vital-rates-for-each-population-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-vital-rates-for-each-population" title="Permalink"></a></h2><pre><code class="language-julia hljs">function fit_all_vital_rates(demo, recruits)
+    survival = fit_vital_rate(SurvivalModel, demo, @formula(survived ~ size_t))
+    growth = fit_vital_rate(GrowthModel, filter(:survived =&gt; identity, demo), @formula(size_t1 ~ size_t))
+    fecundity = fit_vital_rate(FecundityModel, demo, @formula(fecundity ~ size_t), distribution=Poisson_())
+    recruitment = fit_vital_rate(RecruitmentModel, recruits, @formula(recruit_size ~ size_t))
+    return survival, growth, fecundity, recruitment
+end
+
+good_surv, good_grow, good_fec, good_rec = fit_all_vital_rates(good_demo, good_recruits)
+bad_surv, bad_grow, bad_fec, bad_rec = fit_all_vital_rates(bad_demo, bad_recruits)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(FittedSurvival{StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}}(StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}(GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}:
+
+Coefficients:
+────────────────────────────────────────────────────────────────
+        Coef.  Std. Error      z  Pr(&gt;|z|)  Lower 95%  Upper 95%
+────────────────────────────────────────────────────────────────
+x1  -2.31168    0.382964   -6.04    &lt;1e-08  -3.06228   -1.56109
+x2   0.389261   0.0739865   5.26    &lt;1e-06   0.244251   0.534272
+────────────────────────────────────────────────────────────────
+, ModelFrame{@NamedTuple{survived::BitVector, size_t::Vector{Float64}}, GLM.GeneralizedLinearModel}(survived ~ 1 + size_t, StatsModels.Schema with 2 entries:
+  size_t =&gt; size_t
+  survived =&gt; survived
+, (survived = Bool[1, 0, 0, 1, 0, 1, 0, 1, 0, 0  …  0, 0, 1, 1, 1, 0, 0, 1, 1, 0], size_t = [5.603602536897485, 2.402824476475838, 5.635619108079974, 2.612965694186391, 3.1546185145108785, 3.976530274050944, 1.7914519991429423, 4.669435145107663, 7.302148513487012, 4.869678980605093  …  2.511326175288091, 6.162445850664751, 3.849493053352365, 5.765318665612073, 4.108824224700153, 5.43652606860414, 4.027927657286944, 7.436689315894175, 3.5975145410579032, 4.916007509580773]), GLM.GeneralizedLinearModel), ModelMatrix{Matrix{Float64}}([1.0 5.603602536897485; 1.0 2.402824476475838; … ; 1.0 3.5975145410579032; 1.0 4.916007509580773], [1, 2])), survived ~ size_t, Binomial_(), 649.1417456364519, 500), FittedGrowth{StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}}(StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}(GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}:
+
+Coefficients:
+───────────────────────────────────────────────────────────────
+       Coef.  Std. Error      z  Pr(&gt;|z|)  Lower 95%  Upper 95%
+───────────────────────────────────────────────────────────────
+x1  0.280037   0.244916    1.14    0.2529  -0.19999    0.760064
+x2  0.90942    0.0447619  20.32    &lt;1e-91   0.821688   0.997152
+───────────────────────────────────────────────────────────────
+, ModelFrame{@NamedTuple{size_t1::Vector{Float64}, size_t::Vector{Float64}}, GLM.GeneralizedLinearModel}(size_t1 ~ 1 + size_t, StatsModels.Schema with 2 entries:
+  size_t =&gt; size_t
+  size_t1 =&gt; size_t1
+, (size_t1 = [4.812405885385031, 3.6535656459517694, 4.540390852287092, 2.6913516267371387, 4.793460422969168, 3.4037792402273754, 4.804808007809431, 5.724144612146645, 6.266990230625261, 5.844332960678316  …  7.017057112967069, 6.645574476812954, 7.01280833488799, 4.1506633996965725, 3.4116312220655947, 2.4040037073419365, 5.417058469836765, 4.056746690822879, 6.584294696830262, 3.39284470153838], size_t = [5.603602536897485, 2.612965694186391, 3.976530274050944, 4.669435145107663, 6.560360165092901, 2.6044721687247527, 6.359172573678819, 5.215012354065532, 5.27631552196873, 5.281708070760658  …  6.736106959633917, 6.949151082218953, 5.966022218256364, 4.801928063474717, 4.5527080644476525, 3.849493053352365, 5.765318665612073, 4.108824224700153, 7.436689315894175, 3.5975145410579032]), GLM.GeneralizedLinearModel), ModelMatrix{Matrix{Float64}}([1.0 5.603602536897485; 1.0 2.612965694186391; … ; 1.0 7.436689315894175; 1.0 3.5975145410579032], [1, 2])), 0.8861639581126163, size_t1 ~ size_t, Gaussian(), 531.0126908467157, 203), FittedFecundity{StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Poisson{Float64}, GLM.LogLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}, Nothing}(StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Poisson{Float64}, GLM.LogLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}(GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Poisson{Float64}, GLM.LogLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}:
+
+Coefficients:
+─────────────────────────────────────────────────────────────────
+        Coef.  Std. Error      z  Pr(&gt;|z|)   Lower 95%  Upper 95%
+─────────────────────────────────────────────────────────────────
+x1  -7.41832     1.34593   -5.51    &lt;1e-07  -10.0563     -4.78035
+x2   0.670452    0.215401   3.11    0.0019    0.248273    1.09263
+─────────────────────────────────────────────────────────────────
+, ModelFrame{@NamedTuple{fecundity::Vector{Int64}, size_t::Vector{Float64}}, GLM.GeneralizedLinearModel}(fecundity ~ 1 + size_t, StatsModels.Schema with 2 entries:
+  size_t =&gt; size_t
+  fecundity =&gt; fecundity
+, (fecundity = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0], size_t = [5.603602536897485, 2.402824476475838, 5.635619108079974, 2.612965694186391, 3.1546185145108785, 3.976530274050944, 1.7914519991429423, 4.669435145107663, 7.302148513487012, 4.869678980605093  …  2.511326175288091, 6.162445850664751, 3.849493053352365, 5.765318665612073, 4.108824224700153, 5.43652606860414, 4.027927657286944, 7.436689315894175, 3.5975145410579032, 4.916007509580773]), GLM.GeneralizedLinearModel), ModelMatrix{Matrix{Float64}}([1.0 5.603602536897485; 1.0 2.402824476475838; … ; 1.0 3.5975145410579032; 1.0 4.916007509580773], [1, 2])), fecundity ~ size_t, Poisson_(), 107.83162786392724, 500, nothing), FittedRecruitment{StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}}(StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}(GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Normal{Float64}, GLM.IdentityLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}:
+
+Coefficients:
+─────────────────────────────────────────────────────────────────
+         Coef.  Std. Error      z  Pr(&gt;|z|)  Lower 95%  Upper 95%
+─────────────────────────────────────────────────────────────────
+x1   1.4635      0.252196    5.80    &lt;1e-08   0.969209  1.9578
+x2  -0.0625932   0.0393907  -1.59    0.1121  -0.139798  0.0146112
+─────────────────────────────────────────────────────────────────
+, ModelFrame{@NamedTuple{recruit_size::Vector{Float64}, size_t::Vector{Float64}}, GLM.GeneralizedLinearModel}(recruit_size ~ 1 + size_t, StatsModels.Schema with 2 entries:
+  size_t =&gt; size_t
+  recruit_size =&gt; recruit_size
+, (recruit_size = [0.5653086259217635, 1.345105437118184, 0.795551458954685, 1.0693603954818256, 1.1333339079784077, 0.851461953872564, 1.1124994309781744, 1.5714755766141126, 0.921885008272621, 1.4018404986900632, 1.2244535470725162, 0.9854354856298319], size_t = [5.603602536897485, 2.6044721687247527, 7.315449903854948, 6.967345107984691, 6.466819986661218, 7.679162373052949, 6.600412301054096, 2.471233701844199, 8.853457073843028, 7.4600846192711705, 7.063001264327876, 4.15512271299347]), GLM.GeneralizedLinearModel), ModelMatrix{Matrix{Float64}}([1.0 5.603602536897485; 1.0 2.6044721687247527; … ; 1.0 7.063001264327876; 1.0 4.15512271299347], [1, 2])), recruit_size ~ size_t, Gaussian(), 5.8938452715175575, 12))</code></pre><h2 id="Building-kernels"><a class="docs-heading-anchor" href="#Building-kernels">Building kernels</a><a id="Building-kernels-1"></a><a class="docs-heading-anchor-permalink" href="#Building-kernels" title="Permalink"></a></h2><p>We use only three meshpoints here so that <code>exact_ltre()</code> remains computationally feasible.</p><pre><code class="language-julia hljs">domain = ContinuousDomain(1.0, 9.0, 3)
+z = meshpoints(domain)
+
+K_good = vital_rates_to_kernel(good_surv, good_grow, domain) +
+         vital_rates_to_kernel(good_fec, good_rec, domain)
+K_bad = vital_rates_to_kernel(bad_surv, bad_grow, domain) +
+        vital_rates_to_kernel(bad_fec, bad_rec, domain)
+
+λ_good = lambda(K_good)
+λ_bad = lambda(K_bad)
+Δλ = λ_good - λ_bad
+
+println(&quot;λ_good = &quot;, round(λ_good, digits=4))
+println(&quot;λ_bad  = &quot;, round(λ_bad, digits=4))
+println(&quot;Δλ     = &quot;, round(Δλ, digits=4))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">λ_good = 1.056
+λ_bad  = 0.7129
+Δλ     = 0.3431</code></pre><h2 id="Classical-LTRE"><a class="docs-heading-anchor" href="#Classical-LTRE">Classical LTRE</a><a id="Classical-LTRE-1"></a><a class="docs-heading-anchor-permalink" href="#Classical-LTRE" title="Permalink"></a></h2><p>The classical LTRE uses a first-order Taylor approximation around the midpoint or reference matrix.</p><pre><code class="language-julia hljs">classical = ltre(K_good, K_bad)
+println(&quot;Classical LTRE sum = &quot;, round(sum(classical.contributions), digits=6))
+println(&quot;Approximation error = &quot;, round(sum(classical.contributions) - classical.delta_lambda, digits=6))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Classical LTRE sum = 0.342958
+Approximation error = -0.000133</code></pre><pre><code class="language-julia hljs">p = heatmap(
+    z,
+    z,
+    classical.contributions,
+    xlabel=&quot;Parent size class&quot;,
+    ylabel=&quot;Offspring/next size class&quot;,
+    title=&quot;Classical LTRE contributions&quot;,
+    color=:balance,
+)
+p</code></pre><img src="0cd639b9.svg" alt="Example block output"/><h2 id="Exact-LTRE"><a class="docs-heading-anchor" href="#Exact-LTRE">Exact LTRE</a><a id="Exact-LTRE-1"></a><a class="docs-heading-anchor-permalink" href="#Exact-LTRE" title="Permalink"></a></h2><p>The exact LTRE of Hernandez et al. (2023) decomposes <span>$\Delta\lambda$</span> into main effects and interactions without relying on the linear approximation.</p><pre><code class="language-julia hljs">exact = exact_ltre(K_good, K_bad)
+println(&quot;Exact LTRE sum = &quot;, round(sum(exact.effects), digits=6))
+println(&quot;Recovery error = &quot;, round(sum(exact.effects) - Δλ, digits=10))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Exact LTRE sum = 0.343091
+Recovery error = -0.0</code></pre><h3 id="Main-effects-versus-interactions"><a class="docs-heading-anchor" href="#Main-effects-versus-interactions">Main effects versus interactions</a><a id="Main-effects-versus-interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Main-effects-versus-interactions" title="Permalink"></a></h3><pre><code class="language-julia hljs">orders = length.(exact.effect_indices)
+main_idx = findall(==(1), orders)
+interaction_idx = findall(&gt;(1), orders)
+
+main_effects = exact.effects[main_idx]
+main_labels = String[]
+for idx in main_idx
+    varying_slot = exact.effect_indices[idx][1]
+    linear_idx = exact.indices_varying[varying_slot]
+    I = CartesianIndices(K_bad)[linear_idx]
+    push!(main_labels, &quot;(&quot; * string(I[1]) * &quot;, &quot; * string(I[2]) * &quot;)&quot;)
+end
+
+order = sortperm(abs.(main_effects), rev=true)
+keep = order[1:min(6, length(order))]
+
+println(&quot;Total interaction contribution = &quot;, round(sum(exact.effects[interaction_idx]), digits=6))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Total interaction contribution = 0.000767</code></pre><pre><code class="language-julia hljs">p = bar(
+    main_labels[keep],
+    main_effects[keep],
+    xlabel=&quot;Matrix element (row, column)&quot;,
+    ylabel=&quot;Exact main-effect contribution&quot;,
+    title=&quot;Largest exact LTRE main effects&quot;,
+    legend=false,
+    color=:slateblue,
+    alpha=0.8,
+)
+p</code></pre><img src="c4eb0bd2.svg" alt="Example block output"/><h2 id="Comparing-classical-and-exact-decompositions"><a class="docs-heading-anchor" href="#Comparing-classical-and-exact-decompositions">Comparing classical and exact decompositions</a><a id="Comparing-classical-and-exact-decompositions-1"></a><a class="docs-heading-anchor-permalink" href="#Comparing-classical-and-exact-decompositions" title="Permalink"></a></h2><pre><code class="language-julia hljs">comparison = DataFrame(
+    method=[&quot;Observed Δλ&quot;, &quot;Classical LTRE sum&quot;, &quot;Exact LTRE sum&quot;],
+    value=round.([Δλ, sum(classical.contributions), sum(exact.effects)], digits=6),
+)
+comparison</code></pre><div><div style = "float: left;"><span>3×2 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">method</th><th style = "text-align: left;">value</th></tr><tr class = "columnLabelRow"><th class = "stubheadLabel" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">Observed Δλ</td><td style = "text-align: right;">0.343091</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">Classical LTRE sum</td><td style = "text-align: right;">0.342958</td></tr><tr class = "dataRow"><td class = "rowLabel" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: left;">Exact LTRE sum</td><td style = "text-align: right;">0.343091</td></tr></tbody></table></div><p>The classical LTRE is usually close when the two kernels are similar, but the exact method reveals whether non-additive interactions among matrix elements matter. This is especially useful when multiple vital rates shift together between good and bad environments.</p><h2 id="Summary"><a class="docs-heading-anchor" href="#Summary">Summary</a><a id="Summary-1"></a><a class="docs-heading-anchor-permalink" href="#Summary" title="Permalink"></a></h2><p>In this vignette we:</p><ol><li>fit vital rates separately for two environments,</li><li>converted those fits into coarse IPM kernels,</li><li>decomposed the difference in <span>$\lambda$</span> with <code>ltre()</code>, and</li><li>compared that linear approximation with <code>exact_ltre()</code>.</li></ol><p>This workflow links statistical vital-rate estimation directly to demographic explanation.</p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><ul><li>Caswell, H. (2001). <em>Matrix Population Models</em>. Sinauer.</li><li>Hernandez, M. J., et al. (2023). exactLTRE: exact life table response experiments. <em>Methods in Ecology and Evolution</em>, 14, 1065-1078.</li><li>Ellner, S. P., Childs, D. Z., &amp; Rees, M. (2016). <em>Data-Driven Modelling of Structured Populations</em>. Springer.</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../06_density_dependence/">« Density Dependence</a><a class="docs-footer-nextpage" href="../../api/types/">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Monday 8 June 2026 14:54">Monday 8 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

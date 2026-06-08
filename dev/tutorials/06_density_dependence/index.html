@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Density Dependence · VitalRateModels.jl</title><meta name="title" content="Density Dependence · VitalRateModels.jl"/><meta property="og:title" content="Density Dependence · VitalRateModels.jl"/><meta property="twitter:title" content="Density Dependence · VitalRateModels.jl"/><meta name="description" content="Documentation for VitalRateModels.jl."/><meta property="og:description" content="Documentation for VitalRateModels.jl."/><meta property="twitter:description" content="Documentation for VitalRateModels.jl."/><meta property="og:url" content="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/06_density_dependence/"/><meta property="twitter:url" content="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/06_density_dependence/"/><link rel="canonical" href="https://ecorecipes.github.io/VitalRateModels.jl/tutorials/06_density_dependence/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">VitalRateModels.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../01_introduction/">Introduction</a></li><li><a class="tocitem" href="../02_model_selection/">Model Selection</a></li><li><a class="tocitem" href="../03_fecundity/">Fecundity Models</a></li><li><a class="tocitem" href="../04_growth_kernels/">Growth Kernels</a></li><li><a class="tocitem" href="../05_data_preparation/">Data Preparation</a></li><li class="is-active"><a class="tocitem" href>Density Dependence</a><ul class="internal"><li><a class="tocitem" href="#Overview"><span>Overview</span></a></li><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Fitting-density-dependent-vital-rates-from-data"><span>Fitting density-dependent vital rates from data</span></a></li><li><a class="tocitem" href="#Standard-density-response-functions"><span>Standard density-response functions</span></a></li><li><a class="tocitem" href="#Using-DensityVitalRateSpec"><span>Using <code>DensityVitalRateSpec</code></span></a></li><li><a class="tocitem" href="#Projecting-with-density-feedback"><span>Projecting with density feedback</span></a></li><li><a class="tocitem" href="#Summary"><span>Summary</span></a></li><li><a class="tocitem" href="#References"><span>References</span></a></li></ul></li><li><a class="tocitem" href="../07_ltre_from_data/">LTRE from Data</a></li></ul></li><li><span class="tocitem">API Reference</span><ul><li><a class="tocitem" href="../../api/types/">Types</a></li><li><a class="tocitem" href="../../api/fitting/">Fitting</a></li><li><a class="tocitem" href="../../api/model_selection/">Model Selection</a></li><li><a class="tocitem" href="../../api/kernels/">Kernel Construction</a></li><li><a class="tocitem" href="../../api/data_prep/">Data Preparation</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Density Dependence</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Density Dependence</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ecorecipes/VitalRateModels.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ecorecipes/VitalRateModels.jl/blob/main/docs/src/tutorials/06_density_dependence.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="Overview"><a class="docs-heading-anchor" href="#Overview">Overview</a><a id="Overview-1"></a><a class="docs-heading-anchor-permalink" href="#Overview" title="Permalink"></a></h2><p>Vital rates often depend not just on individual state, but also on population density. Competition for light, nutrients, pollinators, or safe sites can reduce survival and especially fecundity as abundance increases. In IPMs this is naturally handled by adding density as a covariate to the vital-rate regressions; in MPMs we often use explicit density-response functions.</p><p>This vignette shows both perspectives.</p><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><pre><code class="language-julia hljs">using VitalRateModels, DataFrames, StatsModels, Distributions, Plots
+using Random
+using StructuredPopulationCore: lambda
+
+matrixpm_available = false
+try
+    @eval using MatrixProjectionModels
+    matrixpm_available = true
+catch
+    struct RickerDensity
+        α::Float64
+        β::Float64
+    end
+    RickerDensity(; α, β) = RickerDensity(α, β)
+    (f::RickerDensity)(N) = f.α * exp(-f.β * N)
+
+    struct BevertonHoltDensity
+        α::Float64
+        β::Float64
+    end
+    BevertonHoltDensity(; α, β) = BevertonHoltDensity(α, β)
+    (f::BevertonHoltDensity)(N) = f.α / (1 + f.β * N)
+
+    struct LogisticDensity
+        r::Float64
+        K::Float64
+    end
+    LogisticDensity(; r, K) = LogisticDensity(r, K)
+    (f::LogisticDensity)(N) = max(0.0, f.r * (1 - N / f.K))
+
+    struct ConstantDensity end
+    (f::ConstantDensity)(N) = 1.0
+
+    struct DensityVitalRateSpec{S, F}
+        survival::S
+        fecundity::F
+    end
+    DensityVitalRateSpec(; survival, fecundity) = DensityVitalRateSpec(survival, fecundity)
+
+    struct DensityDependent end
+    struct DirectIteration end
+
+    struct MPMProblem{F, V, T}
+        f::F
+        n0::V
+        tspan::T
+    end
+    MPMProblem(::DensityDependent, f, n0, tspan) = MPMProblem(f, n0, tspan)
+
+    function apply_density(spec::DensityVitalRateSpec, U, F, N)
+        U_dd = spec.survival(N) .* U
+        F_dd = spec.fecundity(N) .* F
+        return U_dd, F_dd
+    end
+
+end
+
+struct SimpleSolution{T}
+    u::Vector{T}
+end
+
+function project_density(f, n0, tspan)
+    t0, t1 = tspan
+    states = [copy(n0)]
+    n = copy(n0)
+    for t in (t0 + 1):t1
+        n = f(n, nothing, t - 1) * n
+        push!(states, copy(n))
+    end
+    SimpleSolution(states)
+end
+
+apply_density_local(spec, U, F, N) = (spec.survival(N) .* U, spec.fecundity(N) .* F)
+
+Random.seed!(2031)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Random.TaskLocalRNG()</code></pre><h2 id="Fitting-density-dependent-vital-rates-from-data"><a class="docs-heading-anchor" href="#Fitting-density-dependent-vital-rates-from-data">Fitting density-dependent vital rates from data</a><a id="Fitting-density-dependent-vital-rates-from-data-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-density-dependent-vital-rates-from-data" title="Permalink"></a></h2><p>We simulate field data where individual survival depends on both size and local density.</p><pre><code class="language-julia hljs">n = 500
+size_t = clamp.(rand(Normal(5.0, 1.4), n), 0.8, 10.0)
+density_t = rand(20.0:2.0:180.0, n)
+
+surv_logit = @. -0.8 + 0.45 * size_t - 0.012 * density_t
+surv_prob = @. 1 / (1 + exp(-surv_logit))
+survived = rand.(Bernoulli.(surv_prob)) .== 1
+
+data = DataFrame(size_t=size_t, density_t=density_t, survived=survived)
+
+survival_fit = fit_vital_rate(
+    SurvivalModel,
+    data,
+    @formula(survived ~ size_t + density_t),
+)
+
+println(&quot;Density-dependent survival AIC = &quot;, round(survival_fit.aic, digits=2))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Density-dependent survival AIC = 612.55</code></pre><p>To visualize the fitted response we predict across size at low and high density.</p><pre><code class="language-julia hljs">size_domain = collect(range(0.8, 10.0; length=150))
+low_density = DataFrame(size_t=size_domain, density_t=fill(30.0, length(size_domain)))
+high_density = DataFrame(size_t=size_domain, density_t=fill(150.0, length(size_domain)))
+
+surv_low = predict_vital_rate(survival_fit, low_density)
+surv_high = predict_vital_rate(survival_fit, high_density)
+
+p = plot(
+    size_domain,
+    surv_low,
+    linewidth=3,
+    color=:forestgreen,
+    label=&quot;Low density (N = 30)&quot;,
+    xlabel=&quot;Size at time t&quot;,
+    ylabel=&quot;Survival probability&quot;,
+    title=&quot;Density as a covariate in a vital-rate model&quot;,
+)
+plot!(p, size_domain, surv_high, linewidth=3, color=:firebrick, label=&quot;High density (N = 150)&quot;)
+p</code></pre><img src="b5a69693.svg" alt="Example block output"/><h2 id="Standard-density-response-functions"><a class="docs-heading-anchor" href="#Standard-density-response-functions">Standard density-response functions</a><a id="Standard-density-response-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Standard-density-response-functions" title="Permalink"></a></h2><p><code>MatrixProjectionModels.jl</code> also provides reusable density modifiers for matrix or kernel elements.</p><pre><code class="language-julia hljs">N = collect(0.0:2.0:220.0)
+ricker = RickerDensity(α=0.25, β=0.015).(N)
+beverton = BevertonHoltDensity(α=1.8, β=0.01).(N)
+logistic = LogisticDensity(r=1.0, K=160.0).(N)
+
+p = plot(
+    N,
+    ricker,
+    linewidth=3,
+    label=&quot;Ricker&quot;,
+    xlabel=&quot;Population density N&quot;,
+    ylabel=&quot;Vital-rate multiplier&quot;,
+    title=&quot;Common density-response functions&quot;,
+    color=:royalblue,
+)
+plot!(p, N, beverton, linewidth=3, label=&quot;Beverton-Holt&quot;, color=:darkorange)
+plot!(p, N, logistic, linewidth=3, label=&quot;Logistic&quot;, color=:black)
+p</code></pre><img src="0ad64e50.svg" alt="Example block output"/><p>These correspond to different ecological assumptions:</p><ul><li><strong>Ricker</strong>: strong overcompensatory suppression at high density,</li><li><strong>Beverton-Holt</strong>: smooth contest competition, and</li><li><strong>logistic</strong>: linear decline to zero at carrying capacity.</li></ul><h2 id="Using-DensityVitalRateSpec"><a class="docs-heading-anchor" href="#Using-DensityVitalRateSpec">Using <code>DensityVitalRateSpec</code></a><a id="Using-DensityVitalRateSpec-1"></a><a class="docs-heading-anchor-permalink" href="#Using-DensityVitalRateSpec" title="Permalink"></a></h2><p>We now construct a simple 2-stage MPM and let fecundity decline logistically with total abundance.</p><pre><code class="language-julia hljs">U = [0.20  0.00
+     0.55  0.75]
+F = [0.00  4.20
+     0.00  0.00]
+
+spec = DensityVitalRateSpec(
+    survival=ConstantDensity(),
+    fecundity=LogisticDensity(r=1.0, K=150.0),
+)
+
+function dd_matrix(n, p, t)
+    N = sum(n)
+    U_dd, F_dd = apply_density_local(spec, U, F, N)
+    U_dd + F_dd
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">dd_matrix (generic function with 1 method)</code></pre><h2 id="Projecting-with-density-feedback"><a class="docs-heading-anchor" href="#Projecting-with-density-feedback">Projecting with density feedback</a><a id="Projecting-with-density-feedback-1"></a><a class="docs-heading-anchor-permalink" href="#Projecting-with-density-feedback" title="Permalink"></a></h2><pre><code class="language-julia hljs">n0 = [25.0, 12.0]
+sol = project_density(dd_matrix, n0, (0, 60))
+
+total_abundance = [sum(u) for u in sol.u]
+A_eq = dd_matrix(sol.u[end], nothing, 0)
+
+println(&quot;Final abundance ≈ &quot;, round(total_abundance[end], digits=2))
+println(&quot;λ at final abundance = &quot;, round(lambda(A_eq), digits=4))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Final abundance ≈ 121.11
+λ at final abundance = 1.1965</code></pre><pre><code class="language-julia hljs">p = plot(
+    0:60,
+    total_abundance,
+    linewidth=3,
+    xlabel=&quot;Time step&quot;,
+    ylabel=&quot;Total abundance&quot;,
+    title=&quot;Density-dependent projection with logistic fecundity feedback&quot;,
+    label=&quot;N(t)&quot;,
+    color=:purple,
+)
+p</code></pre><img src="d3f5cd76.svg" alt="Example block output"/><p>The trajectory rises when the population is rare, then levels off near the carrying-capacity scale implied by the logistic response. This is the demographic version of the familiar density-feedback picture from classical population ecology.</p><h2 id="Summary"><a class="docs-heading-anchor" href="#Summary">Summary</a><a id="Summary-1"></a><a class="docs-heading-anchor-permalink" href="#Summary" title="Permalink"></a></h2><p>In this vignette we:</p><ol><li>fit a survival model with density as a GLM covariate,</li><li>plotted Ricker, Beverton-Holt, and logistic density responses,</li><li>encoded those responses with <code>DensityVitalRateSpec</code>, and</li><li>projected a simple density-dependent MPM with feedback.</li></ol><p>Exactly the same logic can be used when fitted IPM vital rates are updated at each time step using current abundance or neighborhood density.</p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><ul><li>Caswell, H. (2001). <em>Matrix Population Models</em>. Sinauer.</li><li>Ellner, S. P., Childs, D. Z., &amp; Rees, M. (2016). <em>Data-Driven Modelling of Structured Populations</em>. Springer.</li><li>May, R. M. (1976). Simple mathematical models with very complicated dynamics. <em>Nature</em>, 261, 459-467.</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../05_data_preparation/">« Data Preparation</a><a class="docs-footer-nextpage" href="../07_ltre_from_data/">LTRE from Data »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Monday 8 June 2026 14:54">Monday 8 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
