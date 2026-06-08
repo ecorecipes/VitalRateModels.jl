@@ -1,0 +1,42 @@
+name = "VitalRateModels"
+uuid = "a7c3e1d4-8f2b-4e9a-b6d5-3c1f8a9e7b2d"
+version = "0.1.0"
+authors = ["Simon Frost"]
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+GLM = "38e38edf-8417-5370-95a0-9cdc8944a806"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
+StructuredPopulationCore = "33358fd2-7d60-4541-bded-caea801370e0"
+
+[weakdeps]
+GAM = "e3a43b2c-9f7d-4c8e-b5a1-6d2f3e4c7a8b"
+MixedModels = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
+
+[extensions]
+VitalRateModelsGAMExt = "GAM"
+VitalRateModelsMixedModelsExt = "MixedModels"
+
+[sources]
+StructuredPopulationCore = {path = "../StructuredPopulationCore.jl"}
+
+[compat]
+DataFrames = "1"
+Distributions = "0.25"
+GLM = "1"
+LinearAlgebra = "1"
+Statistics = "1"
+StatsBase = "0.34"
+StatsModels = "0.7"
+StructuredPopulationCore = "0.1"
+julia = "1.11"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
