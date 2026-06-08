@@ -1,0 +1,180 @@
+## Overview
+
+Structured population analyses usually begin with messy longitudinal census data rather than a tidy transition table. `VitalRateModels.jl` includes lightweight helpers for moving from raw monitoring records to a format suitable for fitting vital rates.
+
+This vignette demonstrates a simple workflow:
+
+- simulate five annual censuses for 100 individuals,
+- convert wide data to transition-format data with `verticalize()`,
+- define stage bins with `create_stageframe()`,
+- run basic quality control with `validate_demographic_data()`, and
+- summarize the resulting transitions.
+
+## Setup
+
+```@example vrm
+using VitalRateModels, DataFrames, StatsModels, Distributions, Plots
+using Random
+
+Random.seed!(2030)
+```
+
+## Simulating a five-year census
+
+Each row in the wide table represents one marked individual. We keep size as `0.0` after death so that each census interval still has an explicit fate.
+
+```@example vrm
+n_individuals = 100
+n_years = 5
+
+sizes = fill(0.0, n_individuals, n_years)
+fates = fill(0, n_individuals, n_years - 1)
+fecs = fill(0, n_individuals, n_years - 1)
+
+sizes[:, 1] .= clamp.(rand(Normal(4.0, 1.6), n_individuals), 0.5, 9.0)
+
+for i in 1:n_individuals
+    alive = true
+    for t in 1:(n_years - 1)
+        if alive
+            z = sizes[i, t]
+            surv_prob = 1 / (1 + exp(-(-2.0 + 0.5 * z)))
+            alive = rand(Bernoulli(surv_prob)) == 1
+            fates[i, t] = alive ? 1 : 0
+            if alive
+                sizes[i, t + 1] = clamp(rand(Normal(0.9 + 0.9 * z, 0.7)), 0.5, 11.0)
+                fecs[i, t] = rand(Poisson(exp(-4.2 + 0.45 * z)))
+            else
+                sizes[i, t + 1] = 0.0
+                fecs[i, t] = 0
+            end
+        else
+            sizes[i, t + 1] = 0.0
+            fates[i, t] = 0
+            fecs[i, t] = 0
+        end
+    end
+end
+
+wide = DataFrame(id=1:n_individuals)
+for t in 1:n_years
+    wide[!, Symbol("size_y$(t)")] = sizes[:, t]
+end
+for t in 1:(n_years - 1)
+    wide[!, Symbol("fate_y$(t)_y$(t+1)")] = fates[:, t]
+    wide[!, Symbol("fec_y$(t)")] = fecs[:, t]
+end
+
+first(wide, 6)
+```
+
+## Wide to long with `verticalize()`
+
+For vital-rate fitting we usually want one row per transition $t \rightarrow t+1$.
+
+```@example vrm
+size_cols = [Symbol("size_y$(t)") for t in 1:n_years]
+fate_cols = [Symbol("fate_y$(t)_y$(t+1)") for t in 1:(n_years - 1)]
+fec_cols = [Symbol("fec_y$(t)") for t in 1:(n_years - 1)]
+
+long = verticalize(
+    wide;
+    id_col=:id,
+    size_cols=size_cols,
+    fate_cols=fate_cols,
+    fec_cols=fec_cols,
+)
+
+first(long, 8)
+```
+
+## Defining stage boundaries
+
+Even when the final analysis is continuous-state, stage bins are useful for summaries, exploratory plots, and coarse discretizations.
+
+```@example vrm
+stageframe = create_stageframe(
+    stage_names=[:seedling, :small, :medium, :large, :flowering],
+    sizes=[0.5, 2.0, 4.5, 7.5, 10.0],
+    bin_halfwidths=[0.5, 0.8, 1.2, 1.3, 1.0],
+    reproductive=[false, false, false, false, true],
+    observable=[true, true, true, true, true],
+)
+
+stageframe
+```
+
+A simple exploratory stage assignment can be made from the stage centroids.
+
+```@example vrm
+centers = stageframe.sizes
+labels = String.(stageframe.stage_names)
+
+function nearest_stage(z, centers, labels)
+    labels[argmin(abs.(centers .- z))]
+end
+
+long.stage_t = [nearest_stage(z, centers, labels) for z in long.size_t]
+combine(groupby(long, :stage_t), nrow => :n_transitions)
+```
+
+## Quality control with `validate_demographic_data()`
+
+```@example vrm
+valid = validate_demographic_data(long)
+println("Validation passed? ", valid)
+```
+
+## Exploratory transition summary
+
+```@example vrm
+summarize_transitions(long)
+```
+
+```@example vrm
+p1 = histogram(
+    long.size_t,
+    bins=20,
+    xlabel="Size at time t",
+    ylabel="Frequency",
+    title="Observed size distribution",
+    color=:steelblue,
+    alpha=0.75,
+    label=false,
+)
+
+p2 = scatter(
+    long.size_t,
+    long.size_t1,
+    alpha=0.25,
+    ms=3,
+    xlabel="Size at time t",
+    ylabel="Size at time t+1",
+    title="Observed size transitions",
+    color=:darkgreen,
+    label=false,
+)
+plot!(p2, [0, 11], [0, 11], linestyle=:dash, color=:gray40)
+
+p = plot(p1, p2, layout=(1, 2), size=(920, 360))
+savefig(p, "tutorial_05_data_preparation.svg") # hide
+p
+```
+
+## Summary
+
+In this vignette we:
+
+1. created a realistic multi-year census table,
+2. converted it to transition data with `verticalize()`,
+3. defined stage bins with `create_stageframe()`,
+4. checked the data with `validate_demographic_data()`, and
+5. summarized and plotted the resulting transitions.
+
+These steps usually come before any model fitting, and they are often where most of the practical demographic work happens.
+
+## References
+
+- Caswell, H. (2001). *Matrix Population Models*. Sinauer.
+- Ellner, S. P., Childs, D. Z., & Rees, M. (2016). *Data-Driven Modelling of Structured Populations*. Springer.
+- Salguero-Gómez, R., et al. (2015). The COMPADRE Plant Matrix Database. *Journal of Ecology*, 103, 202-218.

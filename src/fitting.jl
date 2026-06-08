@@ -23,7 +23,7 @@ function fit_vital_rate(::Type{SurvivalModel}, data::DataFrame, formula::Formula
                         distribution::VitalRateDistribution=Binomial_())
     glm_dist, link = _get_glm_family(distribution)
     m = glm(formula, data, glm_dist, link)
-    return FittedSurvival(m, formula, distribution, aic(m), nobs(m))
+    return FittedSurvival(m, formula, distribution, aic(m), Int(nobs(m)))
 end
 
 """
@@ -37,7 +37,7 @@ function fit_vital_rate(::Type{GrowthModel}, data::DataFrame, formula::FormulaTe
     glm_dist, link = _get_glm_family(distribution)
     m = glm(formula, data, glm_dist, link)
     σ = sqrt(deviance(m) / dof_residual(m))
-    return FittedGrowth(m, σ, formula, distribution, aic(m), nobs(m))
+    return FittedGrowth(m, σ, formula, distribution, aic(m), Int(nobs(m)))
 end
 
 """
@@ -49,8 +49,12 @@ Fit a fecundity model with optional separate P(reproducing) model.
 function fit_vital_rate(::Type{FecundityModel}, data::DataFrame, formula::FormulaTerm;
                         distribution::VitalRateDistribution=Poisson_(),
                         repro_formula::Union{Nothing,FormulaTerm}=nothing)
-    glm_dist, link = _get_glm_family(distribution)
-    m = glm(formula, data, glm_dist, link)
+    m = if distribution isa NegativeBinomial_
+        negbin(formula, data, LogLink())
+    else
+        glm_dist, link = _get_glm_family(distribution)
+        glm(formula, data, glm_dist, link)
+    end
 
     # Optional probability-of-reproducing sub-model
     prob_repro = if repro_formula !== nothing
@@ -59,7 +63,7 @@ function fit_vital_rate(::Type{FecundityModel}, data::DataFrame, formula::Formul
         nothing
     end
 
-    return FittedFecundity(m, formula, distribution, aic(m), nobs(m), prob_repro)
+    return FittedFecundity(m, formula, distribution, aic(m), Int(nobs(m)), prob_repro)
 end
 
 """
@@ -77,7 +81,7 @@ function fit_vital_rate(::Type{RecruitmentModel}, data::DataFrame, formula::Form
     else
         0.0
     end
-    return FittedRecruitment(m, formula, distribution, aic(m), nobs(m))
+    return FittedRecruitment(m, formula, distribution, aic(m), Int(nobs(m)))
 end
 
 # --- Prediction ---

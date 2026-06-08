@@ -24,13 +24,21 @@ struct RecruitmentModel <: AbstractVitalRateModel end
 """Distribution family for vital rate responses."""
 abstract type VitalRateDistribution end
 
+"""Gaussian response model, typically used for growth or recruitment."""
 struct Gaussian <: VitalRateDistribution end
+"""Binomial response model with a logit link, typically used for survival."""
 struct Binomial_ <: VitalRateDistribution end
+"""Negative-binomial count model for overdispersed fecundity responses."""
 struct NegativeBinomial_ <: VitalRateDistribution end
+"""Poisson count model for fecundity or recruitment counts."""
 struct Poisson_ <: VitalRateDistribution end
+"""Zero-inflated Poisson count model placeholder for extension backends."""
 struct ZeroInflatedPoisson <: VitalRateDistribution end
+"""Zero-inflated negative-binomial model placeholder for extension backends."""
 struct ZeroInflatedNegBin <: VitalRateDistribution end
+"""Truncated Poisson count model placeholder for extension backends."""
 struct TruncatedPoisson <: VitalRateDistribution end
+"""Truncated negative-binomial model placeholder for extension backends."""
 struct TruncatedNegBin <: VitalRateDistribution end
 
 # --- Fitted vital rate types ---
