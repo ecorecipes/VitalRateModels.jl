@@ -79,5 +79,5 @@ IntegralPM  MatrixPM   PBDM
 
 ## See Also
 
-- [StructuredPopulationCore.jl](https://github.com/ecorecipes/ProjectionModels.jl) — shared abstractions
+- [StructuredPopulationCore.jl](https://github.com/ecorecipes/StructuredPopulationCore.jl) — shared abstractions
 - [GAM.jl](https://github.com/ecorecipes/GAM.jl) — generalized additive models for non-linear vital rates

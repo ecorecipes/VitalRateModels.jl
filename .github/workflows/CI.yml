@@ -19,7 +19,7 @@ jobs:
           path: VitalRateModels.jl
       - uses: actions/checkout@v4
         with:
-          repository: ecorecipes/ProjectionModels.jl
+          repository: ecorecipes/StructuredPopulationCore.jl
           path: StructuredPopulationCore.jl
       - uses: julia-actions/setup-julia@v2
         with:
@@ -43,7 +43,7 @@ jobs:
           path: VitalRateModels.jl
       - uses: actions/checkout@v4
         with:
-          repository: ecorecipes/ProjectionModels.jl
+          repository: ecorecipes/StructuredPopulationCore.jl
           path: StructuredPopulationCore.jl
       - uses: julia-actions/setup-julia@v2
         with:
