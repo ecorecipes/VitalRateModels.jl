@@ -32,13 +32,13 @@ struct Binomial_ <: VitalRateDistribution end
 struct NegativeBinomial_ <: VitalRateDistribution end
 """Poisson count model for fecundity or recruitment counts."""
 struct Poisson_ <: VitalRateDistribution end
-"""Zero-inflated Poisson count model placeholder for extension backends."""
+"""Zero-inflated Poisson count model (declared, but GLM-based fitting is not yet implemented)."""
 struct ZeroInflatedPoisson <: VitalRateDistribution end
-"""Zero-inflated negative-binomial model placeholder for extension backends."""
+"""Zero-inflated negative-binomial model (declared, but GLM-based fitting is not yet implemented)."""
 struct ZeroInflatedNegBin <: VitalRateDistribution end
-"""Truncated Poisson count model placeholder for extension backends."""
+"""Truncated Poisson count model (declared, but GLM-based fitting is not yet implemented)."""
 struct TruncatedPoisson <: VitalRateDistribution end
-"""Truncated negative-binomial model placeholder for extension backends."""
+"""Truncated negative-binomial model (declared, but GLM-based fitting is not yet implemented)."""
 struct TruncatedNegBin <: VitalRateDistribution end
 
 # --- Fitted vital rate types ---
@@ -124,6 +124,7 @@ A fitted recruitment/offspring size distribution.
 """
 struct FittedRecruitment{M} <: AbstractFittedVitalRate
     model::M
+    sigma::Float64
     formula::FormulaTerm
     distribution::VitalRateDistribution
     aic::Float64

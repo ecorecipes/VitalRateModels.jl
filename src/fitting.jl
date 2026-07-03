@@ -81,7 +81,7 @@ function fit_vital_rate(::Type{RecruitmentModel}, data::DataFrame, formula::Form
     else
         0.0
     end
-    return FittedRecruitment(m, formula, distribution, aic(m), Int(nobs(m)))
+    return FittedRecruitment(m, σ, formula, distribution, aic(m), Int(nobs(m)))
 end
 
 # --- Prediction ---
@@ -142,8 +142,9 @@ function _get_glm_family(dist::VitalRateDistribution)
         return Poisson(), LogLink()
     elseif dist isa NegativeBinomial_
         return NegativeBinomial(), LogLink()
+    elseif dist isa Union{ZeroInflatedPoisson,ZeroInflatedNegBin,TruncatedPoisson,TruncatedNegBin}
+        throw(ArgumentError("$(typeof(dist)) fitting is not implemented by the GLM backend; use Poisson_()/NegativeBinomial_() or an extension backend that supports $(typeof(dist))."))
     else
-        # Default fallback for extended distributions
-        return Normal(), IdentityLink()
+        throw(ArgumentError("Unsupported vital-rate distribution $(typeof(dist))."))
     end
 end

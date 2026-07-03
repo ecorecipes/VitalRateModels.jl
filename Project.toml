@@ -1,7 +1,7 @@
 name = "VitalRateModels"
 uuid = "a7c3e1d4-8f2b-4e9a-b6d5-3c1f8a9e7b2d"
-version = "0.1.0"
 authors = ["Simon Frost"]
+version = "0.1.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -17,12 +17,12 @@ StructuredPopulationCore = "33358fd2-7d60-4541-bded-caea801370e0"
 GAM = "e3a43b2c-9f7d-4c8e-b5a1-6d2f3e4c7a8b"
 MixedModels = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
 
+[sources]
+StructuredPopulationCore = {path = "../ProjectionModels.jl"}
+
 [extensions]
 VitalRateModelsGAMExt = "GAM"
 VitalRateModelsMixedModelsExt = "MixedModels"
-
-[sources]
-StructuredPopulationCore = {path = "../StructuredPopulationCore.jl"}
 
 [compat]
 DataFrames = "1"
@@ -36,7 +36,8 @@ StructuredPopulationCore = "0.1"
 julia = "1.11"
 
 [extras]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Random", "Test"]

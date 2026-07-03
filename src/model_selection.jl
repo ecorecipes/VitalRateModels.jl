@@ -14,14 +14,20 @@ Result of model comparison/selection.
 - `models`: Vector of fitted models
 - `formulas`: Corresponding formulas
 - `aic_values`: AIC for each model
-- `delta_aic`: ΔAIC relative to best model
-- `weights`: Akaike weights
+- `bic_values`: BIC for each model
+- `criterion`: Information criterion used for ranking (`:aic` or `:bic`)
+- `criterion_values`: Criterion values used for ranking
+- `delta_aic`: Δ-information-criterion relative to the best model (historical field name)
+- `weights`: Relative model weights under the selected criterion
 - `best_idx`: Index of the best model
 """
 struct ModelComparisonResult{M<:AbstractFittedVitalRate}
     models::Vector{M}
     formulas::Vector{FormulaTerm}
     aic_values::Vector{Float64}
+    bic_values::Vector{Float64}
+    criterion::Symbol
+    criterion_values::Vector{Float64}
     delta_aic::Vector{Float64}
     weights::Vector{Float64}
     best_idx::Int
@@ -64,6 +70,7 @@ best = best_model(result)
 function modelsearch(::Type{T}, data::DataFrame, formulas::AbstractVector{<:FormulaTerm};
                      distribution::Union{Nothing,VitalRateDistribution}=nothing,
                      criterion::Symbol=:aic) where T<:AbstractVitalRateModel
+    criterion in (:aic, :bic) || throw(ArgumentError("criterion must be :aic or :bic, got :$criterion"))
     # Auto-select distribution
     dist = if distribution !== nothing
         distribution
@@ -81,6 +88,7 @@ function modelsearch(::Type{T}, data::DataFrame, formulas::AbstractVector{<:Form
     fitted_models = AbstractFittedVitalRate[]
     valid_formulas = FormulaTerm[]
     aic_vals = Float64[]
+    bic_vals = Float64[]
 
     for f in formulas
         try
@@ -88,6 +96,7 @@ function modelsearch(::Type{T}, data::DataFrame, formulas::AbstractVector{<:Form
             push!(fitted_models, m)
             push!(valid_formulas, f)
             push!(aic_vals, m.aic)
+            push!(bic_vals, _bic_value(m.model))
         catch e
             @warn "Failed to fit model with formula $f: $e"
         end
@@ -95,15 +104,16 @@ function modelsearch(::Type{T}, data::DataFrame, formulas::AbstractVector{<:Form
 
     isempty(fitted_models) && error("All candidate models failed to fit")
 
-    # Compute ΔAIC and Akaike weights
-    min_aic = minimum(aic_vals)
-    delta = aic_vals .- min_aic
+    criterion_vals = criterion == :aic ? aic_vals : bic_vals
+    min_criterion = minimum(criterion_vals)
+    delta = criterion_vals .- min_criterion
     raw_weights = exp.(-0.5 .* delta)
     weights = raw_weights ./ sum(raw_weights)
-    best_idx = argmin(aic_vals)
+    best_idx = argmin(criterion_vals)
 
     return ModelComparisonResult(fitted_models, valid_formulas,
-                                aic_vals, delta, weights, best_idx)
+                                aic_vals, bic_vals, criterion, criterion_vals,
+                                delta, weights, best_idx)
 end
 
 """
@@ -116,7 +126,8 @@ Generates candidate formulas automatically from predictor combinations.
 function modelsearch(::Type{T}, data::DataFrame, response::Symbol,
                      predictors::Vector{Symbol};
                      max_order::Int=2,
-                     distribution::Union{Nothing,VitalRateDistribution}=nothing) where T<:AbstractVitalRateModel
+                     distribution::Union{Nothing,VitalRateDistribution}=nothing,
+                     criterion::Symbol=:aic) where T<:AbstractVitalRateModel
     # Generate candidate formulas with polynomial terms
     formulas = FormulaTerm[]
 
@@ -143,5 +154,8 @@ function modelsearch(::Type{T}, data::DataFrame, response::Symbol,
         end
     end
 
-    return modelsearch(T, data, formulas; distribution=distribution)
+    return modelsearch(T, data, formulas; distribution=distribution, criterion=criterion)
 end
+
+
+_bic_value(model) = dof(model) * log(nobs(model)) - 2 * loglikelihood(model)

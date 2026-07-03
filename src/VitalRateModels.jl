@@ -25,14 +25,14 @@ data = DataFrame(size_t=rand(100), size_t1=rand(100),
                  survived=rand(Bool, 100), fecundity=rand(100))
 
 # Fit vital rates
-surv = fit(SurvivalModel, data, @formula(survived ~ size_t))
-growth = fit(GrowthModel, data, @formula(size_t1 ~ size_t))
-fec = fit(FecundityModel, data, @formula(fecundity ~ size_t))
+surv = fit_vital_rate(SurvivalModel, data, @formula(survived ~ size_t))
+growth = fit_vital_rate(GrowthModel, data, @formula(size_t1 ~ size_t))
+fec = fit_vital_rate(FecundityModel, data, @formula(fecundity ~ size_t))
 
 # Predict on a domain
 using StructuredPopulationCore: ContinuousDomain, meshpoints
 dom = ContinuousDomain(0.0, 1.0, 50)
-surv_pred = predict(surv, meshpoints(dom))
+surv_pred = predict_vital_rate(surv, meshpoints(dom))
 ```
 """
 module VitalRateModels
