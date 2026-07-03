@@ -19,8 +19,8 @@ jobs:
           path: VitalRateModels.jl
       - uses: actions/checkout@v4
         with:
-          repository: ecorecipes/StructuredPopulationCore.jl
-          path: StructuredPopulationCore.jl
+          repository: ecorecipes/ProjectionModels.jl
+          path: ProjectionModels.jl
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
@@ -43,8 +43,8 @@ jobs:
           path: VitalRateModels.jl
       - uses: actions/checkout@v4
         with:
-          repository: ecorecipes/StructuredPopulationCore.jl
-          path: StructuredPopulationCore.jl
+          repository: ecorecipes/ProjectionModels.jl
+          path: ProjectionModels.jl
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
@@ -54,7 +54,7 @@ jobs:
           julia --project=VitalRateModels.jl/docs -e '
             using Pkg
             Pkg.develop([
-              PackageSpec(path="StructuredPopulationCore.jl"),
+              PackageSpec(path="ProjectionModels.jl"),
               PackageSpec(path="VitalRateModels.jl"),
             ])
             Pkg.instantiate()'
